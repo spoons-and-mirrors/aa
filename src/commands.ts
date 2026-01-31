@@ -12,6 +12,24 @@ const INSTRUCTION_FILE = join(
 const DEFAULT_INSTRUCTION =
   'how_to_yield_back:"After completing user request or reached a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent possible. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."';
 
+// In-memory state - always starts as enabled
+let pluginEnabled = true;
+
+/**
+ * Get the current plugin state
+ */
+export function getState(): boolean {
+  return pluginEnabled;
+}
+
+/**
+ * Toggle the plugin state
+ */
+export function toggleState(): boolean {
+  pluginEnabled = !pluginEnabled;
+  return pluginEnabled;
+}
+
 /**
  * Ensure the instruction file exists and return its content
  */
@@ -63,6 +81,7 @@ export function createCommandExecuteHandler(client: OpencodeClient) {
     try {
       if (!args) {
         const current = extractInstruction(loadInstruction());
+        const enabled = getState();
         await sendIgnoredMessage(
           client,
           input.sessionID,
@@ -70,6 +89,9 @@ export function createCommandExecuteHandler(client: OpencodeClient) {
   /aa                  Show this help and current instruction
   /aa prompt goes here Set custom instruction
   /aa -r, --restore    Restore default instruction
+  /aa -o               Toggle plugin on/off
+
+Plugin Status: ${enabled ? 'ENABLED' : 'DISABLED'}
 
 Instructions:
 
@@ -82,6 +104,9 @@ ${current}`
           input.sessionID,
           `Instruction restored to default:\n\n${extractInstruction(DEFAULT_INSTRUCTION)}`
         );
+      } else if (args === '-o') {
+        const newState = toggleState();
+        await sendIgnoredMessage(client, input.sessionID, `[ASK AWAY] ${newState ? 'Enabled' : 'Disabled'}`);
       } else {
         saveInstruction(args);
         await sendIgnoredMessage(client, input.sessionID, `Instruction updated to:\n\n${extractInstruction(args)}`);
