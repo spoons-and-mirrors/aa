@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "name": "@user/opencode-user-instructions",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "OpenCode plugin that injects user instructions synthetic tool on every user message",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "opencode plugin dev",
+        "typecheck": "tsc --noEmit"
+    },
+    "keywords": [
+        "opencode",
+        "opencode-plugin",
+        "plugin"
+    ],
+    "peerDependencies": {
+        "@opencode-ai/plugin": ">=0.13.7"
+    },
+    "devDependencies": {
+        "@opencode-ai/plugin": "^1.0.143",
+        "@types/node": "^24.10.1",
+        "typescript": "^5.9.3"
+    }
+}
