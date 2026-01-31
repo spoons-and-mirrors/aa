@@ -93,7 +93,7 @@ export function createCommandExecuteHandler(client: OpencodeClient) {
   /aa -r, --restore    Restore default instruction
   /aa -o               Toggle plugin on/off
 
-Plugin Status: ${enabled ? 'ENABLED' : 'DISABLED'}
+${enabled ? 'ENABLED' : 'DISABLED'}
 
 Instructions:
 
@@ -108,7 +108,7 @@ ${current}`
         );
       } else if (args === '-o') {
         const newState = toggleState();
-        await sendIgnoredMessage(client, input.sessionID, `[ASK AWAY] ${newState ? 'Enabled' : 'Disabled'}`);
+        await sendIgnoredMessage(client, input.sessionID, `${newState ? 'ENABLED' : 'DISABLED'}`);
       } else {
         saveInstruction(args);
         await sendIgnoredMessage(client, input.sessionID, `Instruction updated to:\n\n${extractInstruction(args)}`);
