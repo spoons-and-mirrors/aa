@@ -12,7 +12,7 @@ const INSTRUCTION_FILE = join(
 );
 
 const DEFAULT_INSTRUCTION =
-  'how_to_yield_back:"After completing user request or reached a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent possible. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."';
+  'how_to_yield_back:"After completing user request or reaching a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."';
 
 // In-memory state - always starts as enabled
 let pluginEnabled = true;
@@ -62,12 +62,12 @@ export function extractInstruction(raw: string): string {
  */
 export function saveInstruction(instruction: string): void {
   mkdirSync(dirname(INSTRUCTION_FILE), { recursive: true });
-  
+
   // If not already in storage format, wrap it
   if (!instruction.match(/^how_to_yield_back:".+"$/s)) {
     instruction = `how_to_yield_back:"${instruction}"`;
   }
-  
+
   writeFileSync(INSTRUCTION_FILE, instruction, 'utf-8');
 }
 
@@ -111,7 +111,11 @@ ${current}`
         await sendIgnoredMessage(client, input.sessionID, `${newState ? 'ENABLED' : 'DISABLED'}`);
       } else {
         saveInstruction(args);
-        await sendIgnoredMessage(client, input.sessionID, `Instruction updated to:\n\n${extractInstruction(args)}`);
+        await sendIgnoredMessage(
+          client,
+          input.sessionID,
+          `Instruction updated to:\n\n${extractInstruction(args)}`
+        );
       }
     } catch (error) {
       await sendIgnoredMessage(
