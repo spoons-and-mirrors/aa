@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import type { OpencodeClient } from './types.js';
+import type { createOpencodeClient } from '@opencode-ai/sdk';
+
+type OpencodeClient = ReturnType<typeof createOpencodeClient>;
 
 const INSTRUCTION_FILE = join(
   process.env.HOME || process.env.USERPROFILE || '',
