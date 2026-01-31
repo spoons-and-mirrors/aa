@@ -1,9 +1,22 @@
 import type { Plugin, PluginInput, Hooks } from '@opencode-ai/plugin';
 import type { Part } from '@opencode-ai/sdk';
 import { log, LOG } from './logger';
+import { createCommandExecuteHandler, loadInstruction } from './src/commands';
 
 export default async function userInstructionsPlugin(input: PluginInput): Promise<Hooks> {
+  const commandHandler = createCommandExecuteHandler(input.client);
+
   return {
+    config: async (opencodeConfig) => {
+      opencodeConfig.command ??= {};
+      opencodeConfig.command.aa = {
+        template: '',
+        description: 'Manage user instruction (display, update, or restore with --restore)',
+      };
+    },
+
+    'command.execute.before': commandHandler,
+
     'experimental.chat.messages.transform': async (
       _input: {},
       output: {
@@ -40,6 +53,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
       const syntheticId = `usin_${now.toString(16)}${random}`;
       const sessionId = lastMsg.info.sessionID;
       const userInfo = lastMsg.info;
+      const instruction = loadInstruction();
 
       const syntheticAssistantMessage = {
         info: {
@@ -77,8 +91,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
                   who_can_use_this_tool: 'user_only',
                 },
               },
-              output:
-                'how_to_yield_back:"After completing user request or reached a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent possible. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."',
+              output: `how_to_yield_back:"${instruction}"`,
               title: 'user_instructions',
               metadata: {
                 remaining_usage_quota_for_this_tool: 0,
