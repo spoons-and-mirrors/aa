@@ -1,12 +1,12 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import type { OpencodeClient } from "./types.js";
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import type { OpencodeClient } from './types.js';
 
 const INSTRUCTION_FILE = join(
-  process.env.HOME || process.env.USERPROFILE || "",
-  ".config",
-  "opencode",
-  "aa-instruction.txt"
+  process.env.HOME || process.env.USERPROFILE || '',
+  '.config',
+  'opencode',
+  'aa-instruction.txt'
 );
 
 const DEFAULT_INSTRUCTION =
@@ -17,21 +17,38 @@ const DEFAULT_INSTRUCTION =
  */
 export function loadInstruction(): string {
   try {
-    const content = readFileSync(INSTRUCTION_FILE, "utf-8");
+    const content = readFileSync(INSTRUCTION_FILE, 'utf-8');
     return content.trim();
   } catch {
     mkdirSync(dirname(INSTRUCTION_FILE), { recursive: true });
-    writeFileSync(INSTRUCTION_FILE, DEFAULT_INSTRUCTION, "utf-8");
+    writeFileSync(INSTRUCTION_FILE, DEFAULT_INSTRUCTION, 'utf-8');
     return DEFAULT_INSTRUCTION;
   }
 }
 
 /**
- * Save a new instruction
+ * Extract the instruction content from the storage format
+ */
+export function extractInstruction(raw: string): string {
+  const match = raw.match(/^how_to_yield_back:"(.+)"$/s);
+  if (match) {
+    return match[1];
+  }
+  return raw;
+}
+
+/**
+ * Save a new instruction (wraps in storage format if needed)
  */
 export function saveInstruction(instruction: string): void {
   mkdirSync(dirname(INSTRUCTION_FILE), { recursive: true });
-  writeFileSync(INSTRUCTION_FILE, instruction, "utf-8");
+  
+  // If not already in storage format, wrap it
+  if (!instruction.match(/^how_to_yield_back:".+"$/s)) {
+    instruction = `how_to_yield_back:"${instruction}"`;
+  }
+  
+  writeFileSync(INSTRUCTION_FILE, instruction, 'utf-8');
 }
 
 /**
@@ -39,48 +56,45 @@ export function saveInstruction(instruction: string): void {
  */
 export function createCommandExecuteHandler(client: OpencodeClient) {
   return async (input: { command: string; sessionID: string; arguments: string }) => {
-    if (input.command !== "aa") return;
+    if (input.command !== 'aa') return;
 
     const args = input.arguments.trim();
 
     try {
       if (!args) {
-        const current = loadInstruction();
+        const current = extractInstruction(loadInstruction());
         await sendIgnoredMessage(
           client,
           input.sessionID,
           `Ask Away Commands:
   /aa                  Show this help and current instruction
   /aa prompt goes here Set custom instruction
-  /aa --restore        Restore default instruction
+  /aa -r, --restore    Restore default instruction
 
-Current instruction:
-${current}`,
+Instructions:
+
+${current}`
         );
-      } else if (args === "--restore") {
+      } else if (args === '--restore' || args === '-r') {
         saveInstruction(DEFAULT_INSTRUCTION);
         await sendIgnoredMessage(
           client,
           input.sessionID,
-          `Instruction restored to default:\n\n${DEFAULT_INSTRUCTION}`,
+          `Instruction restored to default:\n\n${extractInstruction(DEFAULT_INSTRUCTION)}`
         );
       } else {
         saveInstruction(args);
-        await sendIgnoredMessage(
-          client,
-          input.sessionID,
-          `Instruction updated to:\n\n${args}`,
-        );
+        await sendIgnoredMessage(client, input.sessionID, `Instruction updated to:\n\n${extractInstruction(args)}`);
       }
     } catch (error) {
       await sendIgnoredMessage(
         client,
         input.sessionID,
-        `Error: ${error instanceof Error ? error.message : String(error)}`,
+        `Error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
 
-    throw new Error("__AA_COMMAND_HANDLED__");
+    throw new Error('__AA_COMMAND_HANDLED__');
   };
 }
 
@@ -90,13 +104,13 @@ ${current}`,
 export async function sendIgnoredMessage(
   client: OpencodeClient,
   sessionId: string,
-  message: string,
+  message: string
 ): Promise<void> {
   await client.session.prompt({
     path: { id: sessionId },
     body: {
       noReply: true,
-      parts: [{ type: "text", text: message, ignored: true }],
+      parts: [{ type: 'text', text: message, ignored: true }],
     },
   });
 }
