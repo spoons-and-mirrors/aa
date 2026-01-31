@@ -36,22 +36,23 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
       });
 
       const now = Date.now();
-      const syntheticId = `user_instructions_${now}`;
+      const random = Math.random().toString(16).slice(2, 6);
+      const syntheticId = `usin_${now.toString(16)}${random}`;
       const sessionId = lastMsg.info.sessionID;
       const userInfo = lastMsg.info;
 
       const syntheticAssistantMessage = {
         info: {
           id: syntheticId,
-          sessionID: sessionId,
+          sessionID: userInfo.sessionID,
           role: 'assistant' as const,
-          agent: userInfo.agent || 'code',
+          agent: userInfo.agent,
           parentID: userInfo.id,
-          modelID: userInfo.model?.modelID || 'gpt-4.1',
-          providerID: userInfo.model?.providerID || 'openai',
-          mode: 'default' as const,
+          modelID: userInfo.model!.modelID,
+          providerID: userInfo.model!.providerID,
+          mode: userInfo.agent,
           path: { cwd: '/', root: '/' },
-          time: { created: now, completed: now },
+          time: { created: now },
           cost: 0,
           tokens: {
             input: 0,
@@ -80,8 +81,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
                 'how_to_yield_back:"After completing user request or reached a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent possible. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."',
               title: 'user_instructions',
               metadata: {
-                synthetic: true,
-                who_can_use_this_tool: 'user_only',
+                remaining_usage_quota_for_this_tool: 0,
               },
               time: { start: now, end: now },
             },
