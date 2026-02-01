@@ -93,12 +93,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
         isDeepSeekKimi 
       });
 
-      if (!lastMsg || lastMsg.info.role !== 'user') {
-        log.debug(LOG.HOOK, 'Skipping - last message is not from user', {
-          role: lastMsg?.info?.role,
-        });
-        return;
-      }
+ 
 
       const now = Date.now();
       const instruction = loadInstruction();
