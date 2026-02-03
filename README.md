@@ -14,7 +14,7 @@ Injects a `user_instructions` tool, reminding the AI to:
 - `/aa <instruction>` - Update the instruction (persists to `~/.config/opencode/aa-instruction.txt`)
 - `/aa --restore` - Restore the original default instruction
 - `/aa --o` - Toggle plugin on/off
-- 
+
 ## License
 
 MIT
