@@ -15,7 +15,8 @@ Injects a `user_instructions` tool on every user message, reminding the AI to:
 - `/aa` - Display the current instruction
 - `/aa <instruction>` - Update the instruction (persists to `~/.config/opencode/aa-instruction.txt`)
 - `/aa --restore` - Restore the original default instruction
-
+- `/aa --o` - Toggle plugin on/off
+- 
 ## License
 
 MIT
