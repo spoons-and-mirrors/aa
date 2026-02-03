@@ -1,7 +1,5 @@
 # Ask Away - a sobering follow up
 
-An OpenCode plugin that ensures AI assistants always hand control back to you after completing work.
-
 ## What it does
 
 Injects a `user_instructions` tool on every user message, reminding the AI to:
