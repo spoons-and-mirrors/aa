@@ -6,22 +6,19 @@ import { ulid } from 'ulid';
 
 function isDeepSeekOrKimi(providerID?: string, modelID?: string): boolean {
   if (!providerID && !modelID) return false;
-  
+
   const provider = providerID?.toLowerCase() ?? '';
   const model = modelID?.toLowerCase() ?? '';
-  
-  return provider.includes('deepseek') || 
-         provider.includes('kimi') || 
-         model.includes('deepseek') || 
-         model.includes('kimi');
+
+  return (
+    provider.includes('deepseek') ||
+    provider.includes('kimi') ||
+    model.includes('deepseek') ||
+    model.includes('kimi')
+  );
 }
 
-function createSyntheticToolPart(
-  callID: string,
-  tool: string,
-  content: string,
-  now: number
-) {
+function createSyntheticToolPart(callID: string, tool: string, content: string, now: number) {
   return {
     id: `${callID}-p`,
     sessionID: '',
@@ -81,19 +78,23 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
       }
 
       const { messages } = output;
-      const lastMsg = messages[messages.length - 1];
+
+      const lastUserMsg = [...messages].reverse().find((m) => m.info.role === 'user');
+
+      if (!lastUserMsg) {
+        return;
+      }
+
       const providerID = input.model?.providerID;
       const modelID = input.model?.modelID;
       const isDeepSeekKimi = isDeepSeekOrKimi(providerID, modelID);
 
-      log.debug(LOG.HOOK, 'Processing messages.transform', { 
+      log.debug(LOG.HOOK, 'Processing messages.transform', {
         messageCount: messages.length,
         providerID,
         modelID,
-        isDeepSeekKimi 
+        isDeepSeekKimi,
       });
-
- 
 
       const now = Date.now();
       const instruction = loadInstruction();
@@ -101,23 +102,23 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
 
       if (isDeepSeekKimi) {
         log.info(LOG.HOOK, 'Appending tool part to last user message (DeepSeek/Kimi mode)', {
-          messageId: lastMsg.info.id,
+          messageId: lastUserMsg.info.id,
         });
 
-        const toolPart = createSyntheticToolPart(callID, 'user_instructions', `how_to_yield_back:"${instruction}"`, now);
-        lastMsg.parts.push(toolPart);
-        
+        const toolPart = createSyntheticToolPart(callID, 'user_instructions', instruction, now);
+        lastUserMsg.parts.push(toolPart);
+
         log.info(LOG.TOOL, 'Appended user_instructions tool part', {
-          messageId: lastMsg.info.id,
+          messageId: lastUserMsg.info.id,
           toolId: callID,
         });
       } else {
         log.info(LOG.HOOK, 'Creating synthetic assistant message with user_instructions tool', {
-          messageId: lastMsg.info.id,
+          messageId: lastUserMsg.info.id,
         });
 
-        const sessionId = lastMsg.info.sessionID;
-        const userInfo = lastMsg.info;
+        const sessionId = lastUserMsg.info.sessionID;
+        const userInfo = lastUserMsg.info;
 
         const syntheticAssistantMessage = {
           info: {
@@ -155,7 +156,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
                     who_can_use_this_tool: 'user_only',
                   },
                 },
-                output: `how_to_yield_back:"${instruction}"`,
+                output: instruction,
                 title: 'user_instructions',
                 metadata: {
                   remaining_usage_quota_for_this_tool: 0,
