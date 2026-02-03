@@ -2,7 +2,7 @@
 
 ## What it does
 
-Injects a `user_instructions` tool on every user message, reminding the AI to:
+Injects a `user_instructions` tool, reminding the AI to:
 
 - Use the question tool after completing requests or reaching stopping points
 - Ask intelligent questions about pressing matters
