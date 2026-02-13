@@ -1,3 +1,4 @@
 .opencode/
 repomix-output.xml
 bun.lock
+package-lock.json
