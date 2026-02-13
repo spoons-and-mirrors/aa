@@ -95,7 +95,10 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
             type: 'tool' as const,
             callID: `${callID}-c`,
             tool: 'user_instructions',
-            synthetic: true,
+            metadata: {
+              synthetic: true,
+              tool_name: 'user_instructions',
+            },
             state: {
               status: 'completed' as const,
               input: {
