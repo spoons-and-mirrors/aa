@@ -95,23 +95,18 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
             type: 'tool' as const,
             callID: `${callID}-c`,
             tool: 'user_instructions',
-            metadata: {
-              synthetic: true,
-              tool_name: 'user_instructions',
-            },
             state: {
               status: 'completed' as const,
               input: {
                 metadata: {
                   synthetic: true,
                   who_can_use_this_tool: 'user_only',
+                  remaining_usage_quota_for_this_tool: 0,
                 },
               },
               output: instruction,
               title: 'user_instructions',
-              metadata: {
-                remaining_usage_quota_for_this_tool: 0,
-              },
+              metadata: {},
               time: { start: now, end: now },
             },
           },
