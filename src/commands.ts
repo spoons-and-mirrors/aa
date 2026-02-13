@@ -12,6 +12,7 @@ const DEFAULT_INSTRUCTION =
 
 // In-memory state - always starts as enabled
 let pluginEnabled = true;
+let cachedInstruction: string | null = null;
 
 /**
  * Get the current plugin state
@@ -32,13 +33,18 @@ export function toggleState(): boolean {
  * Ensure the instruction file exists and return its content
  */
 export function loadInstruction(): string {
+  if (cachedInstruction !== null) {
+    return cachedInstruction;
+  }
   try {
     const content = readFileSync(INSTRUCTION_FILE, 'utf-8');
-    return content.trim();
+    cachedInstruction = content.trim();
+    return cachedInstruction;
   } catch {
     mkdirSync(dirname(INSTRUCTION_FILE), { recursive: true });
     writeFileSync(INSTRUCTION_FILE, DEFAULT_INSTRUCTION, 'utf-8');
-    return DEFAULT_INSTRUCTION;
+    cachedInstruction = DEFAULT_INSTRUCTION;
+    return cachedInstruction;
   }
 }
 
@@ -65,6 +71,7 @@ export function saveInstruction(instruction: string): void {
   }
 
   writeFileSync(INSTRUCTION_FILE, instruction, 'utf-8');
+  cachedInstruction = instruction;
 }
 
 /**
