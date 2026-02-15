@@ -18,7 +18,7 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
       opencodeConfig.command ??= {};
       opencodeConfig.command.aa = {
         template: '',
-        description: 'Manage user instruction (display, update, restore, or toggle with -o/-f)',
+        description: 'Manage user instruction (display, update, restore, enable/disable, or toggle with -o)',
       };
     },
 
