@@ -8,8 +8,6 @@ function generateId(prefix: string): string {
   return `${prefix}_${ulid()}`;
 }
 
-let shouldInjectOnNextRequest = true;
-
 export default async function userInstructionsPlugin(input: PluginInput): Promise<Hooks> {
   const commandHandler = createCommandExecuteHandler(input.client);
 
@@ -53,14 +51,6 @@ export default async function userInstructionsPlugin(input: PluginInput): Promis
       if (!lastUserMsg) {
         return;
       }
-
-      if (!shouldInjectOnNextRequest) {
-        shouldInjectOnNextRequest = true;
-        log.debug(LOG.HOOK, 'Skipping injection for alternating request');
-        return;
-      }
-
-      shouldInjectOnNextRequest = false;
 
       log.debug(LOG.HOOK, 'Processing messages.transform', {
         messageCount: messages.length,
