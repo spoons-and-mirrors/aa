@@ -10,8 +10,8 @@ const INSTRUCTION_FILE = join(HOME, '.local', 'share', 'opencode', 'storage', 'p
 const DEFAULT_INSTRUCTION =
   'how_to_yield_back:"After completing user request or reaching a stopping point, YOU MUST ALWAYS USE THE QUESTION TOOL TO HAND THE CONVERSATION BACK TO THE USER. The question tool allows for great user experience and allows you to drive some of the process with your suggestions, ultimately, steering the user towards the most critical points in need of resolution. When using the question tool, produce logical, may I say intelligent questions, in regards of the most pressing matters. Use the question tool PROPERLY: be mindful of the expected payload and use all of the question tool capabilities to the fullest extent. Always remember that the user is in control of the conversation and your role is to assist them in achieving their goals effectively."';
 
-// In-memory state - starts disabled until user toggles with /aa -o
-let pluginEnabled = false;
+// In-memory state - starts enabled by default
+let pluginEnabled = true;
 let cachedInstruction: string | null = null;
 
 /**
